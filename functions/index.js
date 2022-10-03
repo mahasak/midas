@@ -71,12 +71,19 @@ const receivedMessage = async (event) => {
     const quickReply = message.quick_reply
 
     if (pageScopeID != functions.config().facebook.page_id) {
-        if (message.text === "#order") {
+        if (message.text.toString().startsWith("#order")) {
+            const orderCmd = message.text.split(" ");
+            if (orderCmd.length === 1 || orderCmd[1] === '' || isNaN(parseInt(orderCmd[1]))) {
+                sendOrderCTA(pageScopeID, "Test Order (Default)", 0);
+            } else {
+                sendOrderCTA(pageScopeID, `Test Order #${orderCmd[1].toString()}`, parseInt(orderCmd[1]));
+            }
             console.log("Request order command detected")
-            sendOrderCTA(pageScopeID, "TEST ORDER");
+
+            
         } else {
-            const instruction_text = "Please send '#order' to get demo order"
-            sendTextMessage(pageScopeID, instruction_text)
+            const instructionText = "Please send '#order' to get demo order"
+            sendTextMessage(pageScopeID, instructionText)
         }
     }
 
@@ -131,7 +138,8 @@ const sendTextMessage = async (recipientId, messageText) => {
     await callSendAPI(messageData)
 }
 
-const sendOrderCTA = async (recipientId, messageText) => {
+const sendOrderCTA = async (recipientId, messageText, orderID=0) => {
+    const order = orderID == 0 ? '568543855056670': `${orderID}`;
     var messageData = {
         recipient: {
             id: recipientId
@@ -148,7 +156,7 @@ const sendOrderCTA = async (recipientId, messageText) => {
                             url: "https://www.messenger.com",
                             title: "View Order",
                             messenger_extensions: true,
-                            internal_native_url: "fb-messenger://3pp_checkout/?order_id=568543855056670"
+                            internal_native_url: `fb-messenger://3pp_checkout/?order_id=${order}`
                         }
                     ]
                 }
