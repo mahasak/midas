@@ -1,5 +1,6 @@
 {
-    "buyer_id": "5810056499018067",
+  "external_invoice_id": "0001",
+  "buyer_id": "5810056499018067",
     "notes": "test note",
     "additional_amount": [
       {
@@ -11,7 +12,7 @@
       }
     ],
     "platform_name": "PapaBear",
-    "platform_logo_url": "",
+    "platform_logo_url": "https://midas-3ca5e.web.app/resources/platform_logo.png",
     "invoice_instructions": "Hi Buyer,\r\nThis is welcome message and instructions",
     "invoice_instructions_image_url": "",
     "product_items": [

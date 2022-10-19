@@ -2,6 +2,9 @@ const { firebaseConfig } = require("firebase-functions");
 const functions = require("firebase-functions");
 const fetch = require('node-fetch');
 
+const SELLER_INSTRUCTION = "https://midas-3ca5e.web.app/resources/seller_instruction.JPG"
+const SELLER_INSTRUCTION_IMG = "https://midas-3ca5e.web.app/resources/seller_instruction.JPG"
+
 exports.webhook = functions.https.onRequest((req, res) => {
     switch (req.method) {
         case 'GET':
@@ -79,11 +82,51 @@ const receivedMessage = async (event) => {
                 sendOrderCTA(pageScopeID, `Test Order #${orderCmd[1].toString()}`, parseInt(orderCmd[1]));
             }
             console.log("Request order command detected")
+        } else if (message.text.toString().startsWith("#help")) {
+            const instructionText = "Available commands:\r\n"
+            +"#order - get default order XMA\r\n"
+            +"#order <order-id> - to get a specific order\r\n"
+            +"#create_order - to create new order (WIP)\r\n"
+            +"any other message will display this help"
 
-            
-        } else {
-            const instructionText = "Please send '#order' to get demo order"
             sendTextMessage(pageScopeID, instructionText)
+        } else if (message.text.toString().startsWith("#create_order")) {
+            const productItems = [
+                {
+                    "external_id": "item01",
+                    "name": "Item 01",
+                    "quantity": 1,
+                    "description": "Item for test number 01",
+                    "currency_amount": {
+                        "amount": "100",
+                        "currency": "THB"
+                    }
+                }
+            ]
+            const additionalAmount = [
+                {
+                    "label": "shipping",
+                    "currency_amount": {
+                        "amount": "100",
+                        "currency": "THB"
+                    }
+                }
+            ]
+            await createOrder(
+                pageScopeID,
+                "002",
+                "Order #002",
+                "Hi Buyer,\r\nThis is welcome message and instructions",
+                SELLER_INSTRUCTION_IMG,
+                productItems,
+                additionalAmount,
+                [],
+                null
+            )
+
+        } else {
+            const hey = "Hi,\r\nPlease send #help to see suppport commands."
+            sendTextMessage(pageScopeID, hey)
         }
     }
 
@@ -124,6 +167,50 @@ const receivedMessageRead = (event) => {
     console.log(`Received message read event for watermark ${watermark} and sequence number ${sequenceNumber}`)
 }
 
+const createOrder = async (buyerId, externalInvoiceID, notes, instructions, instruction_image, product_items, additional_amounts, seller_bank_accounts, shipping_address) => {
+    const payload = {
+        "external_invoice_id": `${externalInvoiceID}`,
+        "buyer_id": `${buyerId}`,
+        "notes": `${notes}`,
+        "additional_amount": additional_amounts,
+        "platform_name": "PapaBear",
+        "platform_logo_url": "https://midas-3ca5e.web.app/resources/platform_logo.png",
+        "invoice_instructions": `${instructions}`,
+        "invoice_instructions_image_url": `${instruction_image}`,
+        "product_items": product_items,
+        "seller_bank_account_ids": `${seller_bank_accounts}`,
+        "features": {
+            "enable_messaging": false,
+            "enable_product_item_removal": false,
+            "allowed_payment_methods": "offsite"
+        }
+    }
+
+    if (shipping_address !== null) {
+        payload['shipping_address'] = shipping_address
+    }
+
+    const res = await fetch('https://graph.facebook.com/v14.0/' + functions.config().facebook.page_id + '/invoice_access_invoice_create?access_token=' + functions.config().facebook.access_token, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' }
+
+    });
+
+    const data = await res.json();
+        console.log(data)
+        
+
+    if (res.ok) {
+        const invoiceId = data.invoice_id
+
+        console.log("Successfully create order with ID %s to recipient %s", invoiceId, buyerId)
+        await sendOrderCTA(buyerId, `Order #${externalInvoiceID} from NativeBear 🐻` ,invoiceId)
+    } else {
+        console.log("Failed create order for recipient %s", buyerId)
+    }
+}
+
 const sendTextMessage = async (recipientId, messageText) => {
     var messageData = {
         recipient: {
@@ -138,8 +225,8 @@ const sendTextMessage = async (recipientId, messageText) => {
     await callSendAPI(messageData)
 }
 
-const sendOrderCTA = async (recipientId, messageText, orderID=0) => {
-    const order = orderID == 0 ? '568543855056670': `${orderID}`;
+const sendOrderCTA = async (recipientId, messageText, orderID = 0) => {
+    const order = orderID == 0 ? '568543855056670' : `${orderID}`;
     var messageData = {
         recipient: {
             id: recipientId
