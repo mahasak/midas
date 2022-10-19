@@ -1,0 +1,45 @@
+{
+    "buyer_id": "5810056499018067",
+    "notes": "test note",
+    "additional_amount": [
+      {
+        "label": "shipping",
+        "currency_amount": {
+          "amount": "100",
+          "currency": "THB"
+        }
+      }
+    ],
+    "platform_name": "PapaBear",
+    "platform_logo_url": "",
+    "invoice_instructions": "Hi Buyer,\r\nThis is welcome message and instructions",
+    "invoice_instructions_image_url": "",
+    "product_items": [
+      {
+        "external_id": "item01",
+        "name": "Item 01",
+        "quantity": 1,
+        "description": "Item for test number 01",
+        "currency_amount": {
+          "amount": "100",
+          "currency": "THB"
+        }
+      }
+    ],
+    "seller_bank_account_ids": "[]",
+    "shipping_address": {
+      "contact_info": {
+        "name": "Max Pijittum",
+        "phone_number": "0897744263"
+      },
+      "address_details": {
+        "country": "TH",
+        "address_line_1": "N/A"
+      }
+    },
+    "features": {
+      "enable_messaging": true,
+      "enable_product_item_removal": false,
+      "allowed_payment_methods": ""
+    }
+  }

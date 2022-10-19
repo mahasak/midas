@@ -154,6 +154,7 @@ const sendOrderCTA = async (recipientId, messageText, orderID=0) => {
                         {
                             type: "web_url",
                             url: "https://www.messenger.com",
+                            fallback_url: `https://www.facebook.com/third_party_checkout/${order}/`,
                             title: "View Order",
                             messenger_extensions: true,
                             internal_native_url: `fb-messenger://3pp_checkout/?order_id=${order}`
