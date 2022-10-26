@@ -7,7 +7,8 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "mocha --reporter spec"
+    "test": "mocha --reporter spec",
+    "prepare": "husky install"
   },
   "engines": {
     "node": "16"
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "firebase-functions-test": "^0.2.3",
+    "husky": "^8.0.1",
     "mocha": "^10.1.0"
   },
   "private": true
