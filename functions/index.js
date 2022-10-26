@@ -1,7 +1,26 @@
-const { firebaseConfig } = require("firebase-functions");
-const functions = require("firebase-functions");
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+const { initializeApp } = require('firebase-admin/app');
+//admin.initializeApp();
+const fs = require('fs')
+const path = require('path')
+
+const JSONfile = fs.readFileSync(path.join(__dirname, `/service-account.json`), 'utf8');
+
+const serviceAccount = JSON.parse(JSONfile);
+
+const FIREBASE_CONFIG = {
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://midas-3ca5e-default-rtdb.firebaseio.com/'
+};
+
+initializeApp(FIREBASE_CONFIG)
+
+const db = admin.database().ref();
 const fetch = require('node-fetch');
 
+
+const PAGE_ID = functions.config().facebook.page_id;
 const SELLER_INSTRUCTION = "https://midas-3ca5e.web.app/resources/seller_instruction.JPG"
 const SELLER_INSTRUCTION_IMG = "https://midas-3ca5e.web.app/resources/seller_instruction.JPG"
 
@@ -73,7 +92,7 @@ const receivedMessage = async (event) => {
     const metadata = message.metadata
     const quickReply = message.quick_reply
 
-    if (pageScopeID != functions.config().facebook.page_id) {
+    if (pageScopeID != PAGE_ID) {
         if (message.text.toString().startsWith("#order")) {
             const orderCmd = message.text.split(" ");
             if (orderCmd.length === 1 || orderCmd[1] === '' || isNaN(parseInt(orderCmd[1]))) {
@@ -84,12 +103,14 @@ const receivedMessage = async (event) => {
             console.log("Request order command detected")
         } else if (message.text.toString().startsWith("#help")) {
             const instructionText = "Available commands:\r\n"
-            +"#order - get default order XMA\r\n"
-            +"#order <order-id> - to get a specific order\r\n"
-            +"#create_order - to create new order (WIP)\r\n"
-            +"any other message will display this help"
+                + "#order - get default order XMA\r\n"
+                + "#order <order-id> - to get a specific order\r\n"
+                + "#create_order - to create new order (WIP)\r\n"
+                + "any other message will display this help"
 
             sendTextMessage(pageScopeID, instructionText)
+
+
         } else if (message.text.toString().startsWith("#create_order")) {
             const productItems = [
                 {
@@ -112,10 +133,9 @@ const receivedMessage = async (event) => {
                     }
                 }
             ]
+
             await createOrder(
                 pageScopeID,
-                "002",
-                "Order #002",
                 "Hi Buyer,\r\nThis is welcome message and instructions",
                 SELLER_INSTRUCTION_IMG,
                 productItems,
@@ -167,11 +187,22 @@ const receivedMessageRead = (event) => {
     console.log(`Received message read event for watermark ${watermark} and sequence number ${sequenceNumber}`)
 }
 
-const createOrder = async (buyerId, externalInvoiceID, notes, instructions, instruction_image, product_items, additional_amounts, seller_bank_accounts, shipping_address) => {
+const createOrder = async (buyerId, instructions, instruction_image, product_items, additional_amounts, seller_bank_accounts, shipping_address) => {
+
+    const orderCountRef = await admin.database().ref('/store/' + PAGE_ID).once('value');
+    const orderCountObj = Object.assign({}, orderCountRef.val());
+
+    const orderId = orderCountObj.orderCount.toString().padStart(10, '0')
+    const note = `Order #${orderId}`
+    
+    const updates = {}
+    updates[`store/${PAGE_ID}/orderCount`] = admin.database.ServerValue.increment(1);
+    admin.database().ref().update(updates);
+
     const payload = {
-        "external_invoice_id": `${externalInvoiceID}`,
+        "external_invoice_id": `${orderId}`,
         "buyer_id": `${buyerId}`,
-        "notes": `${notes}`,
+        "notes": `${note}`,
         "additional_amount": additional_amounts,
         "platform_name": "PapaBear",
         "platform_logo_url": "https://midas-3ca5e.web.app/resources/platform_logo.png",
@@ -190,7 +221,7 @@ const createOrder = async (buyerId, externalInvoiceID, notes, instructions, inst
         payload['shipping_address'] = shipping_address
     }
 
-    const res = await fetch('https://graph.facebook.com/v14.0/' + functions.config().facebook.page_id + '/invoice_access_invoice_create?access_token=' + functions.config().facebook.access_token, {
+    const res = await fetch('https://graph.facebook.com/v14.0/' + PAGE_ID + '/invoice_access_invoice_create?access_token=' + functions.config().facebook.access_token, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: { 'Content-Type': 'application/json' }
@@ -198,14 +229,14 @@ const createOrder = async (buyerId, externalInvoiceID, notes, instructions, inst
     });
 
     const data = await res.json();
-        console.log(data)
-        
+    console.log(data)
+
 
     if (res.ok) {
         const invoiceId = data.invoice_id
 
         console.log("Successfully create order with ID %s to recipient %s", invoiceId, buyerId)
-        await sendOrderCTA(buyerId, `Order #${externalInvoiceID} from NativeBear 🐻` ,invoiceId)
+        await sendOrderCTA(buyerId, `Order #${orderId} from NativeBear 🐻`, invoiceId)
     } else {
         console.log("Failed create order for recipient %s", buyerId)
     }
@@ -257,17 +288,17 @@ const sendOrderCTA = async (recipientId, messageText, orderID = 0) => {
 
 const callSendAPI = async (messageData) => {
     try {
-        const res = await fetch('https://graph.facebook.com/v14.0/' + functions.config().facebook.page_id + '/messages?access_token=' + functions.config().facebook.access_token, {
+        const res = await fetch('https://graph.facebook.com/v14.0/' + PAGE_ID + '/messages?access_token=' + functions.config().facebook.access_token, {
             method: 'POST',
             body: JSON.stringify(messageData),
             headers: { 'Content-Type': 'application/json' }
 
         });
 
-        console.log(messageData)
+        //console.log(messageData)
 
         const data = await res.json();
-        console.log(data)
+        //console.log(data)
         var recipientId = data.recipient_id;
         var messageId = data.message_id
         if (res.ok) {
