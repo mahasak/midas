@@ -18,6 +18,7 @@ describe('Pipeline', function () {
       const ctx = { value: 0 }
       await pipeline.execute(ctx);
       assert.equal(ctx.value, 42)
+      
     });
   });
 });
