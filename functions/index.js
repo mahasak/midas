@@ -1,7 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { initializeApp } = require('firebase-admin/app');
-//admin.initializeApp();
 const fs = require('fs')
 const path = require('path')
 
@@ -13,6 +12,19 @@ const FIREBASE_CONFIG = {
   credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://midas-3ca5e-default-rtdb.firebaseio.com/'
 };
+
+const cart = {}
+const session= {}
+
+/**
+ * cart object
+ * key: psid 
+ * {
+ * item: [item_1, item_2, item_3]
+ * 
+ * }
+ * 
+ */
 
 initializeApp(FIREBASE_CONFIG)
 
@@ -34,8 +46,6 @@ exports.webhook = functions.https.onRequest((req, res) => {
             res.sendStatus(200)
             break
     }
-
-
 })
 
 const verifySubscription = (req, res) => {
