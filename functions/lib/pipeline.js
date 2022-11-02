@@ -1,5 +1,5 @@
-module.exports = function Pipeline(...middlewares) {
-    const stack = middlewares
+module.exports = function Pipeline() {
+    const stack = []
 
     const push = (...middlewares) => {
         stack.push(...middlewares)

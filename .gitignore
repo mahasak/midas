@@ -12,6 +12,8 @@ firebase-debug.*.log*
 
 # Firebase config
 functions/.runtimeconfig.json
+functions/.runtimeconfig_prod.json
+functions/.runtimeconfig_dev.json
 
 # Uncomment this if you'd like others to create their own Firebase project.
 # For a team working on the same Firebase project(s), it is recommended to leave
