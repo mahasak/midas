@@ -10,7 +10,7 @@ exports.getMenu = () => {
         'T02': {
             id: 'T02',
             name: 'Test Product #2',
-            description: 'This is a test product item number #3',
+            description: 'This is a test product item number #2',
             image: '',
             price: '2'
         },

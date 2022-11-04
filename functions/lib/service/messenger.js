@@ -18,7 +18,7 @@ exports.sendTextMessage = async (recipientId, messageText) => {
 
 exports.sendOrderCTA = async (recipientId, messageText, orderID = 0) => {
     const order = orderID == 0 ? '568543855056670' : `${orderID}`;
-    var messageData = {
+    var payload = {
         recipient: {
             id: recipientId
         },
@@ -43,7 +43,7 @@ exports.sendOrderCTA = async (recipientId, messageText, orderID = 0) => {
         }
     }
 
-    await callSendAPI(messageData)
+    await callSendAPI(payload)
 }
 
 const callSendAPI = async (messageData) => {
@@ -58,7 +58,7 @@ const callSendAPI = async (messageData) => {
         const data = await res.json();
         const recipientId = data.recipient_id;
         const messageId = data.message_id
-        
+
         if (res.ok) {
             console.log("Successfully sent message with id %s to recipient %s",
                 messageId, recipientId)

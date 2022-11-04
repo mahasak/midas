@@ -1,14 +1,17 @@
 const functions = require('firebase-functions');
 
+
 const Pipeline = require('./lib/pipeline')
 const { genContext } = require('./lib/context')
-
 const { sendTextMessage, markSeen } = require('./lib/service/messenger')
 const { menuCommand } = require('./lib/middleware/menuCommand')
 const { helpCommand } = require('./lib/middleware/helpCommand')
 const { greetCommand } = require('./lib/middleware/greetCommand')
 const { orderCommand } = require('./lib/middleware/orderCommand')
 const { createOrder } = require('./lib/middleware/createOrder')
+const { currentOrder } = require('./lib/middleware/currentOrder')
+const { addOrder } = require('./lib/middleware/addOrder')
+
 const PAGE_ID = functions.config().facebook.page_id;
 
 
@@ -80,12 +83,15 @@ const receivedMessage = async (event) => {
         ctx.message = message
         ctx.pageScopeID = pageScopeID
 
+        pipeline.push(currentOrder)
+        pipeline.push(addOrder)
         pipeline.push(createOrder)
         pipeline.push(orderCommand)
         pipeline.push(helpCommand)
         pipeline.push(menuCommand)
         pipeline.push(greetCommand)
-
+        
+        
         await pipeline.execute(ctx)
 
     }
