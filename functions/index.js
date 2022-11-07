@@ -45,23 +45,26 @@ const processMessage = (req, _res) => {
     const data = req.body;
     console.log("Receive Message");
 
-    if (data.object == 'page') {
+    if (data.object == 'page' && data.entry !== undefined) {
         data.entry.forEach(pageEntry => {
-            pageEntry.messaging.forEach(async function (event) {
-                if (event.message) {
-                    await receivedMessage(event)
-                } else if (event.delivery) {
-                    receivedDeliveryConfirmation(event)
-                } else if (event.postback) {
-                    receivedPostback(event)
-                } else if (event.read) {
-                    receivedMessageRead(event)
-                } else if (event.account_linking) {
-                    receivedAccountLink(event)
-                } else {
-                    console.log(`Webhook received unknown messagingEvent: ${event}`)
-                }
-            });
+            if (pageEntry.messaging !== undefined) {
+                pageEntry.messaging.forEach(async function (event) {
+                    if (event.message) {
+                        await receivedMessage(event)
+                    } else if (event.delivery) {
+                        receivedDeliveryConfirmation(event)
+                    } else if (event.postback) {
+                        receivedPostback(event)
+                    } else if (event.read) {
+                        receivedMessageRead(event)
+                    } else if (event.account_linking) {
+                        receivedAccountLink(event)
+                    } else {
+                        console.log(`Webhook received unknown messagingEvent: ${event}`)
+                    }
+
+                });
+            }
         });
     }
 }
@@ -78,6 +81,7 @@ const receivedMessage = async (event) => {
     const quickReply = message.quick_reply
 
     const pipeline = Pipeline()
+
     if (pageScopeID != PAGE_ID) {
         const ctx = genContext()
         ctx.message = message
@@ -90,8 +94,8 @@ const receivedMessage = async (event) => {
         pipeline.push(helpCommand)
         pipeline.push(menuCommand)
         pipeline.push(greetCommand)
-        
-        
+
+
         await pipeline.execute(ctx)
 
     }

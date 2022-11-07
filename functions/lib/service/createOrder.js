@@ -35,7 +35,7 @@ exports.createOrder = async (buyerId, instructions, instruction_image, product_i
         "external_invoice_id": `${orderId}`,
         "buyer_id": `${buyerId}`,
         "notes": `${note}`,
-        "additional_amount": additional_amounts,
+        "additional_amounts": additional_amounts,
         "platform_name": "PapaBear",
         "platform_logo_url": "https://midas-3ca5e.web.app/resources/platform_logo.png",
         "invoice_instructions": `${instructions}`,

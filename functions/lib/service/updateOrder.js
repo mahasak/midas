@@ -14,7 +14,7 @@ exports.updateOrder = async (buyerId, orderId, invoiceId, note, paidAmount, addi
             "amount": `${paidAmount}`,
             "currency": "THB"
         },
-        "additional_amount": additionalAmounts,
+        "additional_amounts": additionalAmounts,
         "product_items": productItems
     }
 

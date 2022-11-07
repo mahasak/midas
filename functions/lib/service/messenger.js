@@ -59,6 +59,8 @@ const callSendAPI = async (messageData) => {
         const recipientId = data.recipient_id;
         const messageId = data.message_id
 
+        console.log(messageData)
+
         if (res.ok) {
             console.log("Successfully sent message with id %s to recipient %s",
                 messageId, recipientId)
