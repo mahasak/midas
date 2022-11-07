@@ -1,6 +1,6 @@
 
 
-const { createOrder } = require('../service/createOrder')
+const { invoiceAccessInvoiceCreate } = require('../service/invoiceAccessInvoiceCreate')
 const { saveSession } = require('../service/session')
 const { getMenu } = require('../menu')
 const { genProductItems } = require('../service/cart')
@@ -48,7 +48,7 @@ exports.createOrder = async (ctx, next) => {
             }
         ]
 
-        const result = await createOrder(
+        const result = await invoiceAccessInvoiceCreate(
             ctx.pageScopeID,
             "Hi Buyer 😅,\r\nThis is welcome message and instructions",
             SELLER_INSTRUCTION_IMG,

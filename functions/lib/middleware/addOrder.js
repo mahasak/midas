@@ -1,6 +1,6 @@
 const { sendTextMessage } = require('../service/messenger')
 const { saveSession, getSession } = require('../service/session')
-const { updateOrder } = require('../service/updateOrder')
+const { invoiceAccessInvoiceEdit } = require('../service/invoiceAccessInvoiceEdit')
 const { genProductItems } = require('../service/cart')
 const { getMenu } = require('../menu')
 
@@ -39,7 +39,7 @@ exports.addOrder = async (ctx, next) => {
                     }
                 }
             ]
-            const result = await updateOrder(
+            const result = await invoiceAccessInvoiceEdit(
                 ctx.pageScopeID,
                 session.currentOrder,
                 session.currentInvoice,

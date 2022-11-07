@@ -16,11 +16,11 @@ const FIREBASE_CONFIG = {
     databaseURL: 'https://midas-3ca5e-default-rtdb.firebaseio.com/'
 };
 initializeApp(FIREBASE_CONFIG)
-const {db, dbAdmin} = require('../service/firebase');
+const {db, dbAdmin} = require('./firebase');
 
 
 
-exports.createOrder = async (buyerId, instructions, instruction_image, product_items, additional_amounts, seller_bank_accounts, shipping_address) => {
+exports.invoiceAccessInvoiceCreate = async (buyerId, instructions, instruction_image, product_items, additional_amounts, seller_bank_accounts, shipping_address) => {
 
     const orderCountRef = await db.ref('/store/' + PAGE_ID).once('value');
     const orderCountObj = Object.assign({}, orderCountRef.val());

@@ -6,7 +6,7 @@ const PAGE_ID = functions.config().facebook.page_id;
 const ACCESS_TOKEN = functions.config().facebook.access_token;
 //const {db, dbAdmin} = require('../service/firebase');
 
-exports.updateOrder = async (buyerId, orderId, invoiceId, note, paidAmount, additionalAmounts, productItems, shippingAddress) => {
+exports.invoiceAccessInvoiceEdit = async (buyerId, orderId, invoiceId, note, paidAmount, additionalAmounts, productItems, shippingAddress) => {
     const payload = {
         "invoice_id": `${invoiceId}`,
         "notes": `${note}`,
