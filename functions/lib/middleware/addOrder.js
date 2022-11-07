@@ -3,7 +3,7 @@ const { saveSession, getSession } = require('../service/session')
 const { updateOrder } = require('../service/updateOrder')
 const { genProductItems } = require('../service/cart')
 const { getMenu } = require('../menu')
-const SELLER_INSTRUCTION_IMG = "https://midas-3ca5e.web.app/resources/seller_instruction.JPG"
+
 exports.addOrder = async (ctx, next) => {
     console.log('middleware: add order')
     if (ctx.message.text.toString().startsWith("#add_order")) {
