@@ -50,7 +50,7 @@ exports.createOrder = async (ctx, next) => {
 
         const result = await createOrder(
             ctx.pageScopeID,
-            "Hi Buyer,\r\nThis is welcome message and instructions",
+            "Hi Buyer 😅,\r\nThis is welcome message and instructions",
             SELLER_INSTRUCTION_IMG,
             productItems,
             additionalAmount,

@@ -11,6 +11,7 @@ const { orderCommand } = require('./lib/middleware/orderCommand')
 const { createOrder } = require('./lib/middleware/createOrder')
 const { currentOrder } = require('./lib/middleware/currentOrder')
 const { addOrder } = require('./lib/middleware/addOrder')
+const { orderDetail } = require('./lib/middleware/orderDetail')
 
 const PAGE_ID = functions.config().facebook.page_id;
 
@@ -88,6 +89,7 @@ const receivedMessage = async (event) => {
         ctx.pageScopeID = pageScopeID
 
         pipeline.push(currentOrder)
+        pipeline.push(orderDetail)
         pipeline.push(addOrder)
         pipeline.push(createOrder)
         pipeline.push(orderCommand)
