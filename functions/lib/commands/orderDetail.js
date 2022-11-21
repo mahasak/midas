@@ -10,7 +10,6 @@ exports.orderDetail = async (ctx, next) => {
     if (ctx.message.text.toString().startsWith("#order_detail")) {
         const cmd = ctx.message.text.split(" ");
         const items = cmd[1].toString().split(",")
-        console.log(items)
         await invoiceAccessInvoiceDetails(ctx.pageScopeID, items[0]);
         logger.info('[command] debug order - executed')
         ctx.shouldEnd = true;

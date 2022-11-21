@@ -10,7 +10,6 @@ exports.orderCommand = async (ctx, next) => {
         } else {
             await sendOrderCTA(ctx.pageScopeID, `Test Order #${orderCmd[1].toString()}`, parseInt(orderCmd[1]));
         }
-        console.log("Request order command detected")
         logger.info('[command] order retrieval - executed')
         ctx.shouldEnd = true
     }

@@ -40,7 +40,7 @@ exports.receivedChanges = async (change) => {
                     {
                         "label": "Shipping fee (update)",
                         "currency_amount": {
-                            "amount": `${shippingFeeFactor * 1000}`,
+                            "amount": `${shippingFeeFactor * 100}`,
                             "currency": "THB"
                         }
                     }

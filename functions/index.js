@@ -65,7 +65,6 @@ const processMessage = (req, res) => {
             }
             //process changes
             if (pageEntry.changes !== undefined) {
-                console.log(pageEntry)
                 pageEntry.changes.forEach(async function (change) {
                     await receivedChanges(change);
                 });
@@ -74,7 +73,6 @@ const processMessage = (req, res) => {
     }
     res.sendStatus(200)
 }
-
 
 const receivedMessage = async (event) => {
     const pageScopeID = event.sender.id

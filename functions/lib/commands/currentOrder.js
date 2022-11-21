@@ -8,7 +8,6 @@ exports.currentOrder = async (ctx, next) => {
     if (ctx.message.text.toString().startsWith("#current")) {
         const session = await getSessionData(ctx.pageScopeID);
         if (session !== undefined) {
-            console.log(session)
             await sendOrderCTA(ctx.pageScopeID, `Current Order #${session.orderId}`, parseInt(session.invoiceId));
         } else {
             await sendTextMessage(ctx.pageScopeID, "No current order")

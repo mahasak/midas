@@ -14,8 +14,7 @@ exports.addOrder = async (ctx, next) => {
     logger.info('[command] add item to order')
     if (ctx.message.text.toString().startsWith("#add_order")) {
         const session = await getSessionData(ctx.pageScopeID)
-        console.log('----------- Session Data -----------')
-        console.log(session)
+        debug('Session data', session)
         if (session !== undefined) {
             const addCmd = ctx.message.text.split(" ");
             const items = addCmd[1].toString().split(",")
@@ -26,17 +25,14 @@ exports.addOrder = async (ctx, next) => {
             });
 
             const data = await fetchInvoice.json();
-            console.log(data.data[0].product_items);
             const cart = [];
             for (const item of data.data[0].product_items) {
-                console.log(item)
                 cart[item.external_id] = item.quantity
             }
-            console.log(cart)
 
             const menu = getMenu()
             const menuCode = Object.keys(menu);
-            console.log(cart)
+            
             for (const itemCode of items) {
                 if (menuCode.includes(itemCode.trim())) {
                     const currentCartItems = Object.keys(cart);
@@ -47,7 +43,7 @@ exports.addOrder = async (ctx, next) => {
                     }
                 }
             }
-            console.log(cart)
+
             const productItems = genProductItems(cart);
 
             const result = await invoiceAccessInvoiceEdit(

@@ -20,7 +20,7 @@ exports.sendTextMessage = async (recipientId, messageText) => {
 }
 
 exports.sendOrderCTA = async (recipientId, messageText, orderID = 0) => {
-    logger.info(`[messenger] Sendind Order CTA ${orderID !== 0 ? 'for order ID: ' + orderID : ''} to PSID: ${recipientId}`)
+    logger.info(`[messenger] Sending Order CTA ${orderID !== 0 ? 'for order ID: ' + orderID : ''} to PSID: ${recipientId}`)
 
     const order = orderID == 0 ? '568543855056670' : `${orderID}`
     const payload = {
@@ -70,7 +70,7 @@ const callSendAPI = async (messageData) => {
             logger.error(`[messenger] Failed to send message to PSID: ${recipientId}`)
         }
     } catch (error) {
-        console.log(error)
+        logger.error(`[messenger] Send API error`,error)
     }
 }
 

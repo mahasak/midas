@@ -36,13 +36,12 @@ exports.createOrder = async (ctx, next) => {
         }
 
         const productItems = genProductItems(cart);
-        console.log(productItems)
 
         const additionalAmount = [
             {
                 "label": "Shipping fee",
                 "currency_amount": {
-                    "amount": "100",
+                    "amount": "10",
                     "currency": "THB"
                 }
             }
