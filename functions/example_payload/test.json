@@ -1,0 +1,33 @@
+{
+    "value": {
+        "page_id": 106045115633694,
+        "invoice_id": 1129044534640523,
+        "external_invoice_id": "0000000188",
+        "updates": {
+            "payments": {
+                "new_value": [
+                    {
+                        "payment_amount": {
+                            "currency": "THB",
+                            "amount": "101.00"
+                        },
+                        "payment_method": "bank_slip",
+                        "creation_time": 1669054175,
+                        "metadata": {
+                            "bank_slip": {
+                                "image_url": "https://www.facebook.com/photo.php?fbid=10230836201948929&set=p.10230836201948929&type=3",
+                                "validation_id": "696993418337106",
+                                "transaction_time": 1668607493,
+                                "validation_status": "not_verified",
+                                "validation_error": "ACCOUNT_MATCH:ACCOUNT_MATCH,AMOUNT_DELTA:0,IS_DUPLICATE:DUPLICATE,PAYMENT_AMOUNT:AMOUNT_PAID_MATCH,PAYMENT_TIME:PAID_EARLY",
+                                "seller_bank_account_id": "XXXXX7323X",
+                                "seller_bank_code": "004"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "field": "invoice_access_invoice_draft_change"
+}
