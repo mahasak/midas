@@ -8,6 +8,8 @@ const ACCESS_TOKEN = functions.config().facebook.access_token;
 
 const { db, dbAdmin } = require('./firebase');
 
+const {debug,logger} = require('../logger')
+
 exports.invoiceAccessInvoiceCreate = async (buyerId, instructions, instruction_image, productItems, additionalAmounts, seller_bank_accounts, shipping_address) => {
 
     const orderCountRef = await db.ref('/store/' + PAGE_ID).once('value');
@@ -57,6 +59,7 @@ exports.invoiceAccessInvoiceCreate = async (buyerId, instructions, instruction_i
     }
 
     console.log(payload);
+    debug('create invoice payload', "test", payload)
 
     const res = await fetch('https://graph.facebook.com/v14.0/' + PAGE_ID + '/invoice_access_invoice_create?access_token=' + ACCESS_TOKEN, {
         method: 'POST',

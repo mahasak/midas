@@ -1,20 +1,17 @@
 const functions = require('firebase-functions');
-
-
 const Pipeline = require('./lib/pipeline')
 const { genContext } = require('./lib/context')
 const { sendTextMessage, markSeen } = require('./lib/service/messenger')
-const { menuCommand } = require('./lib/middleware/menuCommand')
-const { helpCommand } = require('./lib/middleware/helpCommand')
-const { greetCommand } = require('./lib/middleware/greetCommand')
-const { orderCommand } = require('./lib/middleware/orderCommand')
-const { createOrder } = require('./lib/middleware/createOrder')
-const { currentOrder } = require('./lib/middleware/currentOrder')
-const { addOrder } = require('./lib/middleware/addOrder')
-const { orderDetail } = require('./lib/middleware/orderDetail')
-
+const { menuCommand } = require('./lib/commands/menuCommand')
+const { helpCommand } = require('./lib/commands/helpCommand')
+const { greetCommand } = require('./lib/commands/greetCommand')
+const { orderCommand } = require('./lib/commands/orderCommand')
+const { createOrder } = require('./lib/commands/createOrder')
+const { currentOrder } = require('./lib/commands/currentOrder')
+const { addOrder } = require('./lib/commands/addOrder')
+const { orderDetail } = require('./lib/commands/orderDetail')
 const { receivedChanges } = require('./lib/service/changes')
-
+const { debug, logger } = require('./lib/logger')
 const PAGE_ID = functions.config().facebook.page_id;
 
 
@@ -25,29 +22,27 @@ exports.webhook = functions.https.onRequest((req, res) => {
             break
         case 'POST':
             processMessage(req, res)
-            res.sendStatus(200)
+            
             break
     }
 })
 
 const verifySubscription = (req, res) => {
-    console.log("Validating webhook")
-    console.log(req.query['hub.verify_token'])
-    console.log(functions.config().facebook.verify_token)
+    logger.info('[webhook-verify] Incoming webhook verification request')
     if (req.query['hub.mode'] === 'subscribe' &&
         req.query['hub.verify_token'] === functions.config().facebook.verify_token) {
-
+        logger.info('[webhook-verify] Successfully validating webhook token')
         res.status(200).send(req.query['hub.challenge'])
     } else {
-        console.error("Failed validation. Make sure the validation tokens match.")
+        logger.error('[webhook-verify] Failed validation. Make sure the validation tokens match.')
         res.sendStatus(403)
     }
 }
 
-const processMessage = (req, _res) => {
-    const data = req.body;
-    console.log("Receive Message");
+const processMessage = (req, res) => {
+    logger.info('[webhook-handler] Incoming webhook messages/changes')
 
+    const data = req.body;
     if (data.object == 'page' && data.entry !== undefined) {
         data.entry.forEach(pageEntry => {
             // process messaging
@@ -64,9 +59,8 @@ const processMessage = (req, _res) => {
                     } else if (event.account_linking) {
                         receivedAccountLink(event)
                     } else {
-                        console.log(`Webhook received unknown messagingEvent: ${event}`)
+                        logger.error(`Webhook received unknown messagingEvent: ${event}`)
                     }
-
                 });
             }
             //process changes
@@ -74,17 +68,17 @@ const processMessage = (req, _res) => {
                 console.log(pageEntry)
                 pageEntry.changes.forEach(async function (change) {
                     await receivedChanges(change);
-
                 });
             }
         });
-    } 
+    }
+    res.sendStatus(200)
 }
 
 
 const receivedMessage = async (event) => {
     const pageScopeID = event.sender.id
-    const recipientID = event.recipient.id
+    const _recipientID = event.recipient.id
     const message = event.message
     const isEcho = message.is_echo
     const messageId = message.mid
@@ -93,15 +87,16 @@ const receivedMessage = async (event) => {
     const quickReply = message.quick_reply
 
     const pipeline = Pipeline()
-    console.log(event)
+    debug('Incoming event', event)
+    debug('Incoming message', message)
+
     if (pageScopeID != PAGE_ID) {
         const ctx = genContext()
         ctx.message = message
         ctx.pageScopeID = pageScopeID
-        console.log(message)
+
         if (!message.text) {
-            console.error('This is not text message')
-            console.log(message)
+            logger.error(`Unsupported messages type (non-text)`, message)
         } else {
             pipeline.push(currentOrder)
             pipeline.push(orderDetail)
@@ -112,24 +107,20 @@ const receivedMessage = async (event) => {
             pipeline.push(menuCommand)
             pipeline.push(greetCommand)
 
-
             await pipeline.execute(ctx)
         }
-
     }
 
     if (isEcho) {
-        console.log(`Received echo for message ${messageId} and app ${appId} with metadata ${metadata}`)
+        logger.info(`Received echo for message ${messageId} and app ${appId} with metadata ${metadata}`)
         return
     } else if (quickReply) {
         const quickReplyPayload = quickReply.payload
-        console.log(`Quick reply for message ${messageId} with payload ${quickReplyPayload}`)
-
+        logger.info(`Quick reply for message ${messageId} with payload ${quickReplyPayload}`)
         await sendTextMessage(senderID, "Quick reply tapped")
         return
     }
 
-    console.log(`Received message from ${pageScopeID} and page ${recipientID} with mesage ${message.text}`)
     await markSeen(pageScopeID)
 }
 
@@ -140,16 +131,16 @@ const receivedDeliveryConfirmation = (event) => {
 
     if (messageIDs) {
         messageIDs.forEach((messageID) => {
-            console.log(`Received delivery confirmation for message ID: ${messageID}`)
+            logger.info(`Received delivery confirmation for message ID: ${messageID}`)
         })
     }
 
-    console.log(`All message before ${watermark} were delivered.`)
+    logger.info(`All message before ${watermark} were delivered.`)
 }
 
 const receivedMessageRead = (event) => {
     const watermark = event.read.watermark
     const sequenceNumber = event.read.seq
 
-    console.log(`Received message read event for watermark ${watermark} and sequence number ${sequenceNumber}`)
+    logger.info(`Received message read event for watermark ${watermark} and sequence number ${sequenceNumber}`)
 }

@@ -1,8 +1,9 @@
 const { getMenu } = require('../menu')
 const {sendTextMessage} = require('../service/messenger')
+const {debug,logger} = require('../logger')
 
 exports.menuCommand = async (ctx, next) => {
-    console.log('middleware: menu')
+    logger.info('[command] menu list')
     if (ctx.message.text.toString().startsWith("#menu")) {
         const menu = getMenu()
         
@@ -11,6 +12,8 @@ exports.menuCommand = async (ctx, next) => {
             menuString = menuString + `${menu[key].id}-${menu[key].name} : ${menu[key].description}\n\n`
         }
         await sendTextMessage(ctx.pageScopeID, menuString)
+
+        logger.info('[command] menu list - executed')
         ctx.shouldEnd = true
     }
     if (!ctx.shouldEnd) await next()

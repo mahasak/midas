@@ -5,6 +5,7 @@ const { sendOrderCTA, sendTextMessage} = require('./messenger')
 const PAGE_ID = functions.config().facebook.page_id;
 const ACCESS_TOKEN = functions.config().facebook.access_token;
 //const {db, dbAdmin} = require('../service/firebase');
+const {debug,logger} = require('../logger')
 
 exports.invoiceAccessInvoiceDetails = async (buyerId, invoiceId) => {
     const res = await fetch(`https://graph.facebook.com/v14.0/${PAGE_ID}/invoice_access_invoice_details?invoice_id=${invoiceId}&access_token=${ACCESS_TOKEN}`, {

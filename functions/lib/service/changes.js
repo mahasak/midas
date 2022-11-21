@@ -6,6 +6,7 @@ const PAGE_ID = functions.config().facebook.page_id;
 const ACCESS_TOKEN = functions.config().facebook.access_token;
 
 const { invoiceAccessInvoiceEdit2 } = require('../service/invoiceAccessInvoiceEdit')
+const {debug,logger} = require('../logger')
 
 exports.receivedChanges = async (change) => {
     // process payment signal / bank slips

@@ -1,7 +1,8 @@
 const {sendOrderCTA} = require('../service/messenger')
+const {debug,logger} = require('../logger')
 
 exports.orderCommand = async (ctx, next) => {
-    console.log('middleware: order retrieval')
+    logger.info('[command] order retrieval')
     if (ctx.message.text.toString().startsWith("#order")) {
         const orderCmd = ctx.message.text.split(" ");
         if (orderCmd.length === 1 || orderCmd[1] === '' || isNaN(parseInt(orderCmd[1]))) {
@@ -10,6 +11,7 @@ exports.orderCommand = async (ctx, next) => {
             await sendOrderCTA(ctx.pageScopeID, `Test Order #${orderCmd[1].toString()}`, parseInt(orderCmd[1]));
         }
         console.log("Request order command detected")
+        logger.info('[command] order retrieval - executed')
         ctx.shouldEnd = true
     }
     if (!ctx.shouldEnd) await next()

@@ -1,18 +1,23 @@
+const functions = require('firebase-functions');
 const Pino = require('pino')
 const { gcpLogOptions } = require('pino-cloud-logging')
 
-const pino = Pino({
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true
-      }
-    }
-  },gcpLogOptions());
+var colors = require('colors');
 
-exports.logger = {
-    info:  (...data) =>{
-        pino.info(...data)
-        //console.log(...data)
+const ENV_MODE = functions.config().midas.env;
+
+exports.debug = (label, ...data) => {
+    if (ENV_MODE == 'dev') {
+        console.log(`---------- debug: ${label} ----------`.red)
+        data.forEach(item => console.log(colors.yellow(item)))
     }
 }
+
+exports.logger = Pino({
+    transport: {
+        target: 'pino-pretty',
+        options: {
+            colorize: true
+        }
+    }
+}, gcpLogOptions())

@@ -1,4 +1,4 @@
-const { getMenu } = require('../menu')
+const { getMenu } = require('./menu')
 
 const menu = getMenu()
 const menuCode = Object.keys(menu);

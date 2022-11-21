@@ -1,15 +1,18 @@
-const functions = require('firebase-functions');
-const PAGE_ID = functions.config().facebook.page_id;
-const ACCESS_TOKEN = functions.config().facebook.access_token;
-const fetch = require('node-fetch');
+const functions = require('firebase-functions')
+const PAGE_ID = functions.config().facebook.page_id
+const ACCESS_TOKEN = functions.config().facebook.access_token
+const fetch = require('node-fetch')
+const { debug, logger } = require('../logger')
+
 exports.sendTextMessage = async (recipientId, messageText) => {
-    var messageData = {
+    logger.info(`[messenger] Sending text message to PSID: ${recipientId}`)
+
+    const messageData = {
         recipient: {
             id: recipientId
         },
         message: {
-            text: messageText,
-            metadata: "DEVELOPER_DEFINED_METADATA"
+            text: messageText
         }
     }
 
@@ -17,8 +20,10 @@ exports.sendTextMessage = async (recipientId, messageText) => {
 }
 
 exports.sendOrderCTA = async (recipientId, messageText, orderID = 0) => {
-    const order = orderID == 0 ? '568543855056670' : `${orderID}`;
-    var payload = {
+    logger.info(`[messenger] Sendind Order CTA ${orderID !== 0 ? 'for order ID: ' + orderID : ''} to PSID: ${recipientId}`)
+
+    const order = orderID == 0 ? '568543855056670' : `${orderID}`
+    const payload = {
         recipient: {
             id: recipientId
         },
@@ -53,30 +58,26 @@ const callSendAPI = async (messageData) => {
             body: JSON.stringify(messageData),
             headers: { 'Content-Type': 'application/json' }
 
-        });
+        })
 
-        const data = await res.json();
-        const recipientId = data.recipient_id;
+        const data = await res.json()
+        const recipientId = data.recipient_id
         const messageId = data.message_id
 
         if (res.ok) {
-            console.log("Successfully sent message with id %s to recipient %s",
-                messageId, recipientId)
+            logger.info(`[messenger] Successfully send message to PSID: ${recipientId} ${messageId !== undefined ? 'messageId:' + messageId : ''}`)
         } else {
-            console.log("Failed called Send API for recipient %s",
-                recipientId)
+            logger.error(`[messenger] Failed to send message to PSID: ${recipientId}`)
         }
-
-
     } catch (error) {
         console.log(error)
     }
 }
 
 exports.markSeen = async (psid) => {
-    console.log("Sending a read receipt to mark message as seen");
+    logger.info('[messenger] Marking messages as seen')
 
-    var messageData = {
+    const messageData = {
         recipient: {
             id: psid
         },

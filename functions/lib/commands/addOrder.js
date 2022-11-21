@@ -1,17 +1,17 @@
 const { sendTextMessage } = require('../service/messenger')
 const { saveSessionData, getSessionData } = require('../service/session')
 const { invoiceAccessInvoiceEdit } = require('../service/invoiceAccessInvoiceEdit')
-const { genProductItems } = require('../service/cart')
+const { genProductItems } = require('../cart')
 const { getMenu } = require('../menu')
 const fetch = require('node-fetch');
 const functions = require('firebase-functions');
 const PAGE_ID = functions.config().facebook.page_id;
 const ACCESS_TOKEN = functions.config().facebook.access_token;
-
+const { debug, logger } = require('../logger')
 
 
 exports.addOrder = async (ctx, next) => {
-    console.log('middleware: add order')
+    logger.info('[command] add item to order')
     if (ctx.message.text.toString().startsWith("#add_order")) {
         const session = await getSessionData(ctx.pageScopeID)
         console.log('----------- Session Data -----------')
@@ -28,9 +28,9 @@ exports.addOrder = async (ctx, next) => {
             const data = await fetchInvoice.json();
             console.log(data.data[0].product_items);
             const cart = [];
-            for(const item of data.data[0].product_items) {
+            for (const item of data.data[0].product_items) {
                 console.log(item)
-                cart[item.external_id]= item.quantity
+                cart[item.external_id] = item.quantity
             }
             console.log(cart)
 
@@ -62,10 +62,11 @@ exports.addOrder = async (ctx, next) => {
             if (result !== undefined) {
                 saveSessionData(ctx.pageScopeID, result.invoiceId, result.orderId)
             }
-            ctx.shouldEnd = true
         } else {
             await sendTextMessage(ctx.pageScopeID, "No current order")
         }
+
+        logger.info('[command] add item to order - executed')
         ctx.shouldEnd = true;
     }
     if (!ctx.shouldEnd) await next()

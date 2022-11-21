@@ -3,11 +3,11 @@
 const { invoiceAccessInvoiceCreate } = require('../service/invoiceAccessInvoiceCreate')
 const { saveSessionData, saveOrderData } = require('../service/session')
 const { getMenu } = require('../menu')
-const { genProductItems } = require('../service/cart')
-const {logger} = require('../logger')
+const { genProductItems } = require('../cart')
+const {debug,logger} = require('../logger')
 const SELLER_INSTRUCTION_IMG = "https://midas-3ca5e.web.app/resources/seller_instruction.JPG"
 exports.createOrder = async (ctx, next) => {
-    logger.info('[PINO]middleware: order creation')
+    logger.info('[command] create new order')
     if (ctx.message.text.toString().startsWith("#create_order")) {
 
 
@@ -85,6 +85,8 @@ exports.createOrder = async (ctx, next) => {
             saveOrderData(result.invoiceId, result.orderId, ctx.pageScopeID)
             
         }
+
+        logger.info('[command] create new order - executed')
         ctx.shouldEnd = true
     }
     if (!ctx.shouldEnd) await next()

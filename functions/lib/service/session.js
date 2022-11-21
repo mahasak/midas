@@ -9,6 +9,8 @@ const emptySessionTemplate = {
 }
 const PAGE_ID = functions.config().facebook.page_id;
 const { db, dbAdmin } = require('./firebase');
+const {debug,logger} = require('../logger')
+
 const createEmptySession = (pageScopeID) => {
     sessionCache.set(pageScopeID, emptySessionTemplate);
 }
