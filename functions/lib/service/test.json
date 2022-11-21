@@ -1,0 +1,29 @@
+{
+    "invoice_id": "455457873409337",
+    "notes": "Order #0000000067 updated 2 updated 2 updated 2 updated 2 updated 2",
+    "paid_amount": {
+        "amount": "10",
+        "currency": "THB"
+    },
+    "product_items": [
+        {
+            "external_id": "T01",
+            "name": "Test Product #1",
+            "description": "This is a test product item number #1",
+            "quantity": 1,
+            "currency_amount": {
+                "amount": "1",
+                "currency": "THB"
+            }
+        }
+    ],
+    "additional_amounts": [
+        {
+            "label": "Shipping fee",
+            "currency_amount": {
+                "amount": "1",
+                "currency": "THB"
+            }
+        }
+    ]
+}

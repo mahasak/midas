@@ -13,6 +13,8 @@ const { currentOrder } = require('./lib/middleware/currentOrder')
 const { addOrder } = require('./lib/middleware/addOrder')
 const { orderDetail } = require('./lib/middleware/orderDetail')
 
+const { receivedChanges } = require('./lib/service/changes')
+
 const PAGE_ID = functions.config().facebook.page_id;
 
 
@@ -48,6 +50,7 @@ const processMessage = (req, _res) => {
 
     if (data.object == 'page' && data.entry !== undefined) {
         data.entry.forEach(pageEntry => {
+            // process messaging
             if (pageEntry.messaging !== undefined) {
                 pageEntry.messaging.forEach(async function (event) {
                     if (event.message) {
@@ -66,8 +69,16 @@ const processMessage = (req, _res) => {
 
                 });
             }
+            //process changes
+            if (pageEntry.changes !== undefined) {
+                console.log(pageEntry)
+                pageEntry.changes.forEach(async function (change) {
+                    await receivedChanges(change);
+
+                });
+            }
         });
-    }
+    } 
 }
 
 
@@ -82,23 +93,28 @@ const receivedMessage = async (event) => {
     const quickReply = message.quick_reply
 
     const pipeline = Pipeline()
-
+    console.log(event)
     if (pageScopeID != PAGE_ID) {
         const ctx = genContext()
         ctx.message = message
         ctx.pageScopeID = pageScopeID
+        console.log(message)
+        if (!message.text) {
+            console.error('This is not text message')
+            console.log(message)
+        } else {
+            pipeline.push(currentOrder)
+            pipeline.push(orderDetail)
+            pipeline.push(addOrder)
+            pipeline.push(createOrder)
+            pipeline.push(orderCommand)
+            pipeline.push(helpCommand)
+            pipeline.push(menuCommand)
+            pipeline.push(greetCommand)
 
-        pipeline.push(currentOrder)
-        pipeline.push(orderDetail)
-        pipeline.push(addOrder)
-        pipeline.push(createOrder)
-        pipeline.push(orderCommand)
-        pipeline.push(helpCommand)
-        pipeline.push(menuCommand)
-        pipeline.push(greetCommand)
 
-
-        await pipeline.execute(ctx)
+            await pipeline.execute(ctx)
+        }
 
     }
 

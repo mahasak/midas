@@ -1,18 +1,38 @@
 const { sendTextMessage } = require('../service/messenger')
-const { saveSession, getSession } = require('../service/session')
+const { saveSessionData, getSessionData } = require('../service/session')
 const { invoiceAccessInvoiceEdit } = require('../service/invoiceAccessInvoiceEdit')
 const { genProductItems } = require('../service/cart')
 const { getMenu } = require('../menu')
+const fetch = require('node-fetch');
+const functions = require('firebase-functions');
+const PAGE_ID = functions.config().facebook.page_id;
+const ACCESS_TOKEN = functions.config().facebook.access_token;
+
+
 
 exports.addOrder = async (ctx, next) => {
     console.log('middleware: add order')
     if (ctx.message.text.toString().startsWith("#add_order")) {
-        const session = getSession(ctx.pageScopeID);
+        const session = await getSessionData(ctx.pageScopeID)
+        console.log('----------- Session Data -----------')
+        console.log(session)
         if (session !== undefined) {
-            console.log(session)
             const addCmd = ctx.message.text.split(" ");
             const items = addCmd[1].toString().split(",")
-            const cart = session.cart
+
+            // Fetch order details
+            const fetchInvoice = await fetch(`https://graph.facebook.com/v14.0/${PAGE_ID}/invoice_access_invoice_details?invoice_id=${session.invoiceId}&access_token=${ACCESS_TOKEN}`, {
+                method: 'GET',
+            });
+
+            const data = await fetchInvoice.json();
+            console.log(data.data[0].product_items);
+            const cart = [];
+            for(const item of data.data[0].product_items) {
+                console.log(item)
+                cart[item.external_id]= item.quantity
+            }
+            console.log(cart)
 
             const menu = getMenu()
             const menuCode = Object.keys(menu);
@@ -30,28 +50,17 @@ exports.addOrder = async (ctx, next) => {
             console.log(cart)
             const productItems = genProductItems(cart);
 
-            const additionalAmount = [
-                {
-                    "label": "shipping",
-                    "currency_amount": {
-                        "amount": "100",
-                        "currency": "THB"
-                    }
-                }
-            ]
             const result = await invoiceAccessInvoiceEdit(
                 ctx.pageScopeID,
-                session.currentOrder,
-                session.currentInvoice,
-                "Hi Buyer,\r\nThis is welcome message and instructions - updated",
-                0,
-                additionalAmount,
+                session.orderId,
+                session.invoiceId,
+                data.data[0].buyer_notes,
+                data.data[0].paid_amount,
+                data.data[0].additional_amounts,
                 productItems
             )
             if (result !== undefined) {
-                saveSession(ctx.pageScopeID, "currentInvoice", result.invoiceId)
-                saveSession(ctx.pageScopeID, "currentOrder", result.orderId)
-                saveSession(ctx.pageScopeID, "cart", cart)
+                saveSessionData(ctx.pageScopeID, result.invoiceId, result.orderId)
             }
             ctx.shouldEnd = true
         } else {

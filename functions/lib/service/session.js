@@ -7,44 +7,33 @@ const emptySessionTemplate = {
     basket: {},
     orderCommand: {}
 }
+const PAGE_ID = functions.config().facebook.page_id;
+const { db, dbAdmin } = require('./firebase');
 const createEmptySession = (pageScopeID) => {
     sessionCache.set(pageScopeID, emptySessionTemplate);
 }
 exports.newSession = createEmptySession
 
-exports.saveSession = (pageScopeID, key, val) => {
-    let sessionData = sessionCache.get(pageScopeID);
-    functions.logger.log("sessionData:", sessionData);
-    if (sessionData === undefined) {
-        // session not found
-        sessionData = {}
-    }
-
-    sessionData[key] = val
-
-    sessionCache.set(pageScopeID, sessionData)
-    functions.logger.log("saving session:", sessionData);
+exports.saveOrderData = (invoiceId, externalOrderId, pageScopeID) => {
+    const orderRef = db.ref(`store/${PAGE_ID}/orders/${invoiceId}`)
+    orderRef.update({
+            psid: pageScopeID,
+            orderId: externalOrderId
+    })
 }
 
-exports.getSession = (pageScopeID) => {
-    const sessionData = sessionCache.get(pageScopeID);
-
-    if (sessionData === undefined) {
-        // session not found
-        return undefined
-    }
-
-    return sessionData;
+exports.saveSessionData = (psid, InvoiceId, externalOrderId) => {
+    const sessionRef = db.ref(`store/${PAGE_ID}/sessions/${psid}`)
+    sessionRef.update({
+            invoiceId: InvoiceId,
+            orderId: externalOrderId
+    })
 }
-
-exports.getSessionKey = (pageScopeID, key) => {
-    const sessionData = sessionCache.get(pageScopeID);
-    console.log(sessionData);
-    console.log(Object.keys(sessionData))
-    if (sessionData == undefined || !Object.keys(sessionData).includes(key)) {
-        // session not found
-        return undefined
-    }
-
-    return sessionData[key];
+exports.getOrderData = async (invoiceId) => {
+    const orderRef = await db.ref(`store/${PAGE_ID}/orders/${invoiceId}`).once('value');
+    return Object.assign({}, orderRef.val())
+}
+exports.getSessionData = async (psid) => {
+    const sessionRef = await db.ref(`store/${PAGE_ID}/sessions/${psid}`).once('value');
+    return Object.assign({}, sessionRef.val())
 }

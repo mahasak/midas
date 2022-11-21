@@ -1,0 +1,24 @@
+{
+    "recipient": {
+        "id": "5256085031169695"
+    },
+    "message": {
+        "attachment": {
+            "type": "template",
+            "payload": {
+                "template_type": "button",
+                "text": "test\n1\n2\n",
+                "buttons": [
+                    {
+                        "type": "web_url",
+                        "url": "https://www.messenger.com",
+                        "fallback_url": "https: //www.facebook.com/third_party_checkout/${order}/",
+                        "title": "View Order",
+                        "messenger_extensions": true,
+                        "internal_native_url": "fb-messenger: //3pp_checkout/?order_id=${order"
+                    }
+                ]
+            }
+        }
+    }
+}

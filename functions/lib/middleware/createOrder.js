@@ -1,13 +1,13 @@
 
 
 const { invoiceAccessInvoiceCreate } = require('../service/invoiceAccessInvoiceCreate')
-const { saveSession } = require('../service/session')
+const { saveSessionData, saveOrderData } = require('../service/session')
 const { getMenu } = require('../menu')
 const { genProductItems } = require('../service/cart')
-
+const {logger} = require('../logger')
 const SELLER_INSTRUCTION_IMG = "https://midas-3ca5e.web.app/resources/seller_instruction.JPG"
 exports.createOrder = async (ctx, next) => {
-    console.log('middleware: order creation')
+    logger.info('[PINO]middleware: order creation')
     if (ctx.message.text.toString().startsWith("#create_order")) {
 
 
@@ -40,7 +40,7 @@ exports.createOrder = async (ctx, next) => {
 
         const additionalAmount = [
             {
-                "label": "shipping",
+                "label": "Shipping fee",
                 "currency_amount": {
                     "amount": "100",
                     "currency": "THB"
@@ -48,9 +48,32 @@ exports.createOrder = async (ctx, next) => {
             }
         ]
 
+        const instructions = "Hi Buyer 😀😀,\n"+
+        "This is welcome message and instructions\n\n" +
+        "Line #1 \n"+
+        "Line #2 \n"+
+        "Line #3 \n"+
+        "Line #4 \n"+
+        "Line #5 \n"+
+        "Line #6 \n"+
+        "Line #7 \n"+
+        "Line #8 \n"+
+        "Line #9 \n"+
+        "Line #10 \n"+
+        "Line #11 \n"+
+        "Line #12 \n"+
+        "Line #13 \n"+
+        "Line #14 \n"+
+        "Line #15 \n"+
+        "Line #16 \n"+
+        "Line #17 \n"+
+        "Line #18 \n"+
+        "Line #19 \n"+
+        "Line #20"
+
         const result = await invoiceAccessInvoiceCreate(
             ctx.pageScopeID,
-            "Hi Buyer 😅,\r\nThis is welcome message and instructions",
+            instructions,
             SELLER_INSTRUCTION_IMG,
             productItems,
             additionalAmount,
@@ -58,9 +81,9 @@ exports.createOrder = async (ctx, next) => {
             null
         )
         if (result !== undefined) {
-            saveSession(ctx.pageScopeID, "currentInvoice", result.invoiceId)
-            saveSession(ctx.pageScopeID, "currentOrder", result.orderId)
-            saveSession(ctx.pageScopeID, "cart", cart)
+            saveSessionData(ctx.pageScopeID, result.invoiceId, result.orderId)
+            saveOrderData(result.invoiceId, result.orderId, ctx.pageScopeID)
+            
         }
         ctx.shouldEnd = true
     }
