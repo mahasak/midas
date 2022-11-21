@@ -15,21 +15,14 @@ exports.invoiceAccessInvoiceDetails = async (buyerId, invoiceId) => {
     const data = await res.json();
 
     if (res.ok) {
-        console.log(data)
-        console.log("#################")
-        console.log(data.data)
         const invoiceIdFromAPI = data.data[0].invoice_id
-
-        console.log("Successfully fetch order with ID %s", invoiceIdFromAPI)
+        logger.info(`[invoice-detail-api] Successfully get invoice ${invoiceIdFromAPI}'s details`)
+        debug('Invoice detail', data.data[0])
 
         let productItemStr = ''
         for (const productItems of data.data[0].product_items) {
             productItemStr += `- ${productItems.name} x ${productItems.quantity} = ${productItems.currency_amount.amount} ${productItems.currency_amount.currency}\r\n\r\n`
         }
-
-        console.log(data.data[0].payments)
-
-        console.log(data.data[0].payments[0].metadata)
 
         const txt = `Order Detail for #${invoiceIdFromAPI}\r\n\r\n`
         + `invoice ID: ${data.data[0].invoice_id}\r\n\r\n`
@@ -46,13 +39,12 @@ exports.invoiceAccessInvoiceDetails = async (buyerId, invoiceId) => {
         + `validation_error: ${data.data[0].payments[0].metadata.bank_slip.validation_error}\r\n\r\n`
         await sendTextMessage(buyerId, txt)
         
-        //await sendOrderCTA(buyerId, `Please See order detail for #${invoiceId} here`, invoiceId)
         return {
             invoiceId: invoiceId,
         }
     } else {
-        console.log(res.body)
-        console.log("Failed to fetch order for invoice ID %s", invoiceId)
+        logger.error(`[invoice-detail-api] Failed to fetch order id ${invoiceId} for recipient ${buyerId}`)
+        logger.error("[invoice-detail-api] Failed API response",data)
         return undefined
     }
 }

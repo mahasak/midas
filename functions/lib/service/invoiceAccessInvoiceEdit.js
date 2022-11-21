@@ -16,7 +16,6 @@ exports.invoiceAccessInvoiceEdit = async (buyerId, orderId, invoiceId, note, pai
     }
     const updateAdditionalAmount = []
     if (additionalAmounts !== null) {
-        console.log(additionalAmounts)
         for (const additionalAmount of additionalAmounts) {
             updateAdditionalAmount.push({
                 label: additionalAmount.label,
@@ -33,8 +32,7 @@ exports.invoiceAccessInvoiceEdit = async (buyerId, orderId, invoiceId, note, pai
     if (shippingAddress !== null) {
         payload['shipping_address'] = shippingAddress
     }
-    console.log('----------------- PAYLOAD ----------------')
-    console.log(payload)
+    debug('edit invoice payload', payload)
 
     const res = await fetch('https://graph.facebook.com/v14.0/' + PAGE_ID + '/invoice_access_invoice_edit?access_token=' + ACCESS_TOKEN, {
         method: 'POST',
@@ -68,15 +66,15 @@ exports.invoiceAccessInvoiceEdit = async (buyerId, orderId, invoiceId, note, pai
         note += `Paid amount: ${paidAmount.amount} THB\n`
         note += `Total amount: ${total} THB`
 
-        console.log("Successfully update order with ID %s to recipient %s", invoiceId, buyerId)
+        logger.info(`[invoice-edit-api] Sending updated order CTA for invoice ${invoiceId} to recipient ${buyerId}`)
         await sendOrderCTA(buyerId, note, invoiceId)
         return {
             invoiceId: invoiceId,
             orderId: orderId
         }
     } else {
-        console.log(data);
-        console.log("Failed to uptdate order for recipient %s", buyerId)
+        logger.error("[invoice-edit-api] Failed to update order for recipient %s", buyerId)
+        logger.error("[invoice-edit-api] Failed API response",data)
         return undefined
     }
 }

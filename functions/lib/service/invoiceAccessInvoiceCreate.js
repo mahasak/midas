@@ -58,8 +58,7 @@ exports.invoiceAccessInvoiceCreate = async (buyerId, instructions, instruction_i
         payload['shipping_address'] = shipping_address
     }
 
-    console.log(payload);
-    debug('create invoice payload', "test", payload)
+    debug('create invoice payload', payload)
 
     const res = await fetch('https://graph.facebook.com/v14.0/' + PAGE_ID + '/invoice_access_invoice_create?access_token=' + ACCESS_TOKEN, {
         method: 'POST',
@@ -73,15 +72,15 @@ exports.invoiceAccessInvoiceCreate = async (buyerId, instructions, instruction_i
     if (res.ok) {
         const invoiceId = data.invoice_id
 
-        console.log("Successfully create order with ID %s to recipient %s", invoiceId, buyerId)
+        logger.info(`[invoice-create-api] Sending order CTA for invoice ${invoiceId} to recipient ${buyerId}`)
         await sendOrderCTA(buyerId, note, invoiceId)
         return {
             invoiceId: invoiceId,
             orderId: orderId
         }
     } else {
-        console.log("Failed create order for recipient %s", buyerId)
-        console.log(data)
+        logger.error("[invoice-create-api] Failed create order for recipient %s", buyerId)
+        logger.error("[invoice-create-api] Failed API response",data)
         return undefined
     }
 
